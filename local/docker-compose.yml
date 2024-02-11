@@ -1,0 +1,16 @@
+services:
+  rinha-db:
+    image: postgres
+    environment:
+      POSTGRES_DB: rinha
+      POSTGRES_USER: galo
+      POSTGRES_PASSWORD: brigamuito
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    volumes:
+      - ./initialize.sql:/docker-entrypoint-initdb.d/initialize.sql
