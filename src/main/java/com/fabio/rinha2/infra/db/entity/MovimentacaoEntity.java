@@ -2,22 +2,26 @@ package com.fabio.rinha2.infra.db.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "TB_MOVIMENTACAO")
 public class MovimentacaoEntity {
 
     @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Integer id;
     private Integer idCliente;
     private BigInteger valor;
     private Character tipo;
     private String descricao;
-    private String dataMovimentacao;
+    private LocalDateTime dataMovimentacao;
 
     public Integer getId() {
         return id;
@@ -59,11 +63,11 @@ public class MovimentacaoEntity {
         this.descricao = descricao;
     }
 
-    public String getDataMovimentacao() {
+    public LocalDateTime getDataMovimentacao() {
         return dataMovimentacao;
     }
 
-    public void setDataMovimentacao(String dataMovimentacao) {
+    public void setDataMovimentacao(LocalDateTime dataMovimentacao) {
         this.dataMovimentacao = dataMovimentacao;
     }
 }

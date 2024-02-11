@@ -1,9 +1,11 @@
 package com.fabio.rinha2.domain;
 
-import com.fabio.rinha2.infra.db.entity.ClienteEntity;
 import com.fabio.rinha2.infra.db.repository.ClienteRepository;
 import com.fabio.rinha2.web.model.GetExtratoResponse;
+import com.fabio.rinha2.web.model.mapper.ExtratoMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class ExtratoService {
@@ -16,8 +18,7 @@ public class ExtratoService {
         this.extratoMapper = extratoMapper;
     }
 
-    public GetExtratoResponse getExtrato(Integer id){
-        ClienteEntity cliente = clienteRepository.getReferenceById(id);
-        return extratoMapper.fromClient(cliente);
+    public Optional<GetExtratoResponse> getExtrato(Integer id) {
+        return clienteRepository.findSaldoById(id).map(extratoMapper::fromClient);
     }
 }

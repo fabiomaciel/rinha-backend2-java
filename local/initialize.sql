@@ -5,12 +5,12 @@ CREATE TABLE IF NOT EXISTS TB_CLIENTE(
 );
 
 CREATE TABLE IF NOT EXISTS TB_MOVIMENTACAO(
-    id serial PRIMARY KEY,
+    id serial PRIMARY KEY NOT NULL,
     id_cliente smallint NOT NULL,
     valor bigint NOT NULL,
     tipo character(1) NOT NULL,
     descricao character(10) NOT NULL,
-    data_movimentacao timestamp NOT NULL default current_timestamp,
+    data_movimentacao timestamp default current_timestamp,
     FOREIGN KEY (id_cliente) REFERENCES TB_CLIENTE(id)
 );
 

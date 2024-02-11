@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 public class GetExtratoResponse {
