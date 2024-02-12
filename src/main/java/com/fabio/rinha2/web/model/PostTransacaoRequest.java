@@ -1,17 +1,18 @@
 package com.fabio.rinha2.web.model;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class PostTransacaoRequest {
-    private BigInteger valor;
+    private BigDecimal valor;
     private Character tipo;
     private String descricao;
 
-    public BigInteger getValor() {
+    public BigDecimal getValor() {
         return valor;
     }
 
-    public void setValor(BigInteger valor) {
+    public void setValor(BigDecimal valor) {
         this.valor = valor;
     }
 

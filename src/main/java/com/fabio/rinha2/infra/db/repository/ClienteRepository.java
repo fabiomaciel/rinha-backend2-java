@@ -21,7 +21,7 @@ public interface ClienteRepository extends JpaRepository<ClienteEntity, Integer>
     int debito(Integer id, BigInteger amount);
 
     @Query(value = "SELECT id, saldo, limite FROM TB_CLIENTE WHERE id = :id", nativeQuery = true)
-    Optional<ClienteEntity> findSaldoById(Integer id);
+    Optional<ClienteEntity> findSaldoByIdNative(Integer id);
 
 
 }
