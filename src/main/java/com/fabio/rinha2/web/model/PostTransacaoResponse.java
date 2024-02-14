@@ -9,7 +9,8 @@ public class PostTransacaoResponse {
     private BigInteger saldo;
 
     @JsonIgnore
-    private boolean sufficientBalance;
+    private ErrorType error;
+
 
     public BigInteger getLimite() {
         return limite;
@@ -27,11 +28,56 @@ public class PostTransacaoResponse {
         this.saldo = saldo;
     }
 
-    public boolean isSufficientBalance() {
-        return sufficientBalance;
+    public ErrorType getError() {
+        return error;
     }
 
-    public void setSufficientBalance(boolean sufficientBalance) {
-        this.sufficientBalance = sufficientBalance;
+    public void setError(ErrorType error) {
+        this.error = error;
+    }
+
+    public static enum ErrorType {
+        INSUFFICIENT_BALANCE,
+        INVALID_ACCOUNT
+    }
+
+    public static PostTransacaoResponseBuilder builder() {
+        return new PostTransacaoResponseBuilder();
+    }
+
+    public static class PostTransacaoResponseBuilder {
+        private BigInteger limite;
+        private BigInteger saldo;
+        private ErrorType error;
+
+        PostTransacaoResponseBuilder() {
+        }
+
+        public PostTransacaoResponseBuilder limite(BigInteger limite) {
+            this.limite = limite;
+            return this;
+        }
+
+        public PostTransacaoResponseBuilder saldo(BigInteger saldo) {
+            this.saldo = saldo;
+            return this;
+        }
+
+        public PostTransacaoResponseBuilder error(ErrorType error) {
+            this.error = error;
+            return this;
+        }
+
+        public PostTransacaoResponse build() {
+            PostTransacaoResponse postTransacaoResponse = new PostTransacaoResponse();
+            postTransacaoResponse.setLimite(limite);
+            postTransacaoResponse.setSaldo(saldo);
+            postTransacaoResponse.setError(error);
+            return postTransacaoResponse;
+        }
+
+        public String toString() {
+            return "PostTransacaoResponse.PostTransacaoResponseBuilder(limite=" + this.limite + ", saldo=" + this.saldo + ", error=" + this.error + ")";
+        }
     }
 }

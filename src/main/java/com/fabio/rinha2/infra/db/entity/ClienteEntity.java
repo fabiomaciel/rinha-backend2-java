@@ -1,18 +1,9 @@
 package com.fabio.rinha2.infra.db.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import org.springframework.context.annotation.Lazy;
-
 import java.math.BigInteger;
-import java.util.List;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Entity
-@Table(name = "TB_CLIENTE")
 public class ClienteEntity {
 
-    @Id
     private Integer id;
     private BigInteger limite;
     private BigInteger saldo;
@@ -39,5 +30,42 @@ public class ClienteEntity {
 
     public void setSaldo(BigInteger saldo) {
         this.saldo = saldo;
+    }
+
+
+    public static ClienteEntityBuilder builder() {
+        return new ClienteEntityBuilder();
+    }
+
+    public static class ClienteEntityBuilder {
+        private Integer id;
+        private BigInteger limite;
+        private BigInteger saldo;
+
+        ClienteEntityBuilder() {
+        }
+
+        public ClienteEntityBuilder id(Integer id) {
+            this.id = id;
+            return this;
+        }
+
+        public ClienteEntityBuilder limite(BigInteger limite) {
+            this.limite = limite;
+            return this;
+        }
+
+        public ClienteEntityBuilder saldo(BigInteger saldo) {
+            this.saldo = saldo;
+            return this;
+        }
+
+        public ClienteEntity build() {
+            ClienteEntity clienteEntity = new ClienteEntity();
+            clienteEntity.setId(id);
+            clienteEntity.setLimite(limite);
+            clienteEntity.setSaldo(saldo);
+            return clienteEntity;
+        }
     }
 }

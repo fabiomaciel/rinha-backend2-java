@@ -1,70 +1,80 @@
 package com.fabio.rinha2.domain;
 
-import com.fabio.rinha2.infra.db.entity.ClienteEntity;
 import com.fabio.rinha2.infra.db.entity.MovimentacaoEntity;
-import com.fabio.rinha2.infra.db.repository.ClienteRepository;
 import com.fabio.rinha2.infra.db.repository.ClienteRepositoryR;
 import com.fabio.rinha2.infra.db.repository.MovimentacaoRepository;
 import com.fabio.rinha2.web.model.PostTransacaoRequest;
 import com.fabio.rinha2.web.model.PostTransacaoResponse;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.Optional;
+
+import static com.fabio.rinha2.web.model.PostTransacaoResponse.ErrorType.INSUFFICIENT_BALANCE;
+import static com.fabio.rinha2.web.model.PostTransacaoResponse.ErrorType.INVALID_ACCOUNT;
 
 @Service
 public class TransacaoService {
 
-    private final ClienteRepository clienteRepository;
+    private final ClienteRepositoryR clienteRepository;
     private final MovimentacaoRepository movimentacaoRepository;
 
-    public TransacaoService(ClienteRepository clienteRepository, MovimentacaoRepository movimentacaoRepository) {
+    private final MovimentacaoServiceAsync movimentacaoServiceAsync;
+
+    public TransacaoService(ClienteRepositoryR clienteRepository, MovimentacaoRepository movimentacaoRepository, MovimentacaoServiceAsync movimentacaoServiceAsync) {
         this.clienteRepository = clienteRepository;
         this.movimentacaoRepository = movimentacaoRepository;
+        this.movimentacaoServiceAsync = movimentacaoServiceAsync;
     }
 
-    @Transactional
-    public Optional<PostTransacaoResponse> executarMovimentacao(Integer id, PostTransacaoRequest request) {
+
+    public Mono<PostTransacaoResponse> executarMovimentacao(Integer id, PostTransacaoRequest request) {
 
         BigInteger valor = request.getValor().toBigInteger();
 
-        int success = 1;
+        return doCrebito(id, request, valor).flatMap((success) -> {
+            if (success == 0) {
+                return Mono.just(PostTransacaoResponse.builder().error(INSUFFICIENT_BALANCE).build());
+            }
+            return getClienteIfExists(id).map(cliente -> {
+                saveMovimentacao(id, request, valor);
+                return cliente;
+            });
+        });
+
+    }
+
+
+    private Mono<PostTransacaoResponse> getClienteIfExists(Integer id) {
+        return clienteRepository.findSaldoByIdNative(id).map(cliente -> {
+            if (cliente == null) {
+                return PostTransacaoResponse.builder().error(INVALID_ACCOUNT).build();
+            }
+            return PostTransacaoResponse.builder().limite(cliente.getLimite()).saldo(cliente.getSaldo()).build();
+        });
+    }
+
+    private Mono<Long> doCrebito(Integer id, PostTransacaoRequest request, BigInteger valor) {
+        return executeCrebito(id, request, valor);
+    }
+
+    private Mono<Long> executeCrebito(Integer id, PostTransacaoRequest request, BigInteger valor) {
         if (request.getTipo().equals('c')) {
-            clienteRepository.credito(id, valor);
-        } else {
-            success = clienteRepository.debito(id, valor);
+            return clienteRepository.credito(id, valor);
         }
+        return clienteRepository.debito(id, valor);
+    }
 
-        Optional<ClienteEntity> cliente = clienteRepository.findSaldoByIdNative(id);
-
-        if (cliente.isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (success == 0) {
-            PostTransacaoResponse response = new PostTransacaoResponse();
-            response.setSufficientBalance(false);
-            return Optional.of(response);
-        }
-
-        final MovimentacaoEntity movimentacao = new MovimentacaoEntity();
+    private void saveMovimentacao(Integer id, PostTransacaoRequest request, BigInteger valor) {
+        MovimentacaoEntity movimentacao = new MovimentacaoEntity();
         movimentacao.setIdCliente(id);
         movimentacao.setDescricao(request.getDescricao());
         movimentacao.setValor(valor);
         movimentacao.setTipo(request.getTipo());
         movimentacao.setDataMovimentacao(LocalDateTime.now());
-
-        movimentacaoRepository.save(movimentacao);
-
-        PostTransacaoResponse response = new PostTransacaoResponse();
-        response.setSufficientBalance(true);
-
-        return cliente.map(c -> {
-            response.setLimite(c.getLimite());
-            response.setSaldo(c.getSaldo());
-            return response;
-        });
+        movimentacaoServiceAsync.save(movimentacao);
     }
 }

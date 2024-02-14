@@ -12,10 +12,18 @@ import java.util.List;
 @Component
 public class ExtratoMapper {
 
-    public GetExtratoResponse fromClient(ClienteEntity cliente, List<MovimentacaoEntity> movimentacaoList) {
+    public GetExtratoResponse fromClient(ClienteEntity cliente) {
         GetExtratoResponse response = new GetExtratoResponse();
         response.setSaldo(new GetExtratoSaldoResponse(cliente.getLimite(), cliente.getSaldo()));
-        response.setTransacoes(GetExtratoTransacaoResponse.fromMovimentacoes(movimentacaoList));
+        response.setTransacoes(List.of());
+        return response;
+    }
+
+    public GetExtratoResponse fromMovimentacao(List<MovimentacaoEntity> movimentacaoList) {
+        MovimentacaoEntity first = movimentacaoList.get(0);
+        GetExtratoResponse response = new GetExtratoResponse();
+        response.setSaldo(new GetExtratoSaldoResponse(first.getLimite(), first.getSaldo()));
+        response.setTransacoes(first.getDataMovimentacao() == null ? List.of() : GetExtratoTransacaoResponse.fromMovimentacoes(movimentacaoList));
         return response;
     }
 }

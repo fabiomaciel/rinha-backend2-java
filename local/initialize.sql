@@ -14,10 +14,10 @@ CREATE TABLE IF NOT EXISTS TB_MOVIMENTACAO(
     FOREIGN KEY (id_cliente) REFERENCES TB_CLIENTE(id)
 );
 
+CREATE INDEX idx_movimentacao_cliente_data ON TB_MOVIMENTACAO (id_cliente, data_movimentacao DESC);
 
 INSERT INTO TB_CLIENTE(id, limite, saldo) VALUES (1, 100000, 0);
 INSERT INTO TB_CLIENTE(id, limite, saldo) VALUES (2, 80000, 0);
 INSERT INTO TB_CLIENTE(id, limite, saldo) VALUES (3, 1000000, 0);
 INSERT INTO TB_CLIENTE(id, limite, saldo) VALUES (4, 10000000, 0);
 INSERT INTO TB_CLIENTE(id, limite, saldo) VALUES (5, 500000, 0);
-

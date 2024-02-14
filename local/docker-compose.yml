@@ -8,6 +8,13 @@ services:
     hostname: api01
     environment:
       - DB_HOSTNAME=db
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+      nproc:
+        soft: 65535
+        hard: 65535
 
     # Não é necessário expor qualquer porta além da porta do load balancer,
     # mas é comum as pessoas o fazerem para testarem suas APIs e conectarem
@@ -20,7 +27,7 @@ services:
       resources:
         limits:
           cpus: "0.6"
-          memory: "200MB"
+          memory: "400MB"
 
   api02:
     # Essa sintaxe reusa o que foi declarado em 'api01'.
@@ -38,14 +45,21 @@ services:
     depends_on:
       - api01
       - api02
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+      nproc:
+        soft: 65535
+        hard: 65535
     ports:
       # Obrigatório expor/usar a porta 9999 no load balancer!
       - "9999:9999"
     deploy:
       resources:
         limits:
-          cpus: "0.17"
-          memory: "10MB"
+          cpus: "0.25"
+          memory: "100MB"
 
   db:
     image: postgres
@@ -53,6 +67,14 @@ services:
       POSTGRES_DB: rinha
       POSTGRES_USER: galo
       POSTGRES_PASSWORD: brigamuito
+      PG_MAX_WAL_SIZE: '2GB'        # Increases the maximum size of WAL files before triggering a checkpoint
+      PG_MIN_WAL_SIZE: '1GB'        # Sets the minimum size of WAL files
+      PG_CHECKPOINT_TIMEOUT: '10min' # Increases the time between automatic WAL checkpoints
+      PG_WORK_MEM: '64MB'           # Sets the amount of memory used for query operations like sorts and hashes
+      PG_MAINTENANCE_WORK_MEM: '128MB' # Sets the maximum amount of memory for maintenance operations, such as vacuuming
+      PG_EFFECTIVE_CACHE_SIZE: '2GB' # Advises the planner on how much memory is available for caching data
+      PG_SHARED_BUFFERS: '512MB'    # Sets the amount of memory the database server uses for shared memory buffers
+      PG_MAX_CONNECTIONS: '40'     # Adjusts the maximum number of concurrent connections
     ports:
       - "5432:5432"
     deploy:

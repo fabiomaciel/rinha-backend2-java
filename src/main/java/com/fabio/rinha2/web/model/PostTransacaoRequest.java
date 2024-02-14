@@ -1,7 +1,6 @@
 package com.fabio.rinha2.web.model;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class PostTransacaoRequest {
     private BigDecimal valor;
